@@ -1,12 +1,16 @@
 import http from "http";
 import express from "express";
-import WebSocket, { WebSocketEventMap, WebSocketServer } from "ws";
+import { Server, Socket } from "socket.io";
 
 const app = express();
 const server = http.createServer(app);
 
-const wss = new WebSocketServer({ server });
+const io = new Server({
+    cors: {
+        origin: "*"
+    }
+})
 
-wss.on('connection', (ws: WebSocket) => {
+io.on('connection', (socket: Socket) => {
     console.log("a user connected");
 })
