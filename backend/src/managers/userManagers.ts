@@ -1,16 +1,20 @@
 import { Socket } from "socket.io";
-interface Users {
+import { RoomManager } from "./roomManager";
+
+export interface Users {
     name: string
     socket: Socket
 }
 
-export class userManager {
+export class UserManager {
     private users: Users[];
     private queue: string[];
+    private roomManager: RoomManager;
 
     constructor() {
         this.users = [];
         this.queue = [];
+        this.roomManager = new RoomManager();
     }
 
     addUser(name: string, socket: Socket) {
@@ -38,7 +42,11 @@ export class userManager {
         const user1 = this.users.find(x => x.socket.id === socketID1);
         const user2 = this.users.find(x => x.socket.id === socketID2);
 
-        console.log("room creation started");
+        if (!user1 || !user2) {
+            return;
+        }
 
+        console.log("room creation started");
+        const room = this.roomManager.createRoom(user1, user2);
     }
 }
