@@ -49,6 +49,8 @@ export class UserManager {
 
         console.log("room creation started");
         const room = this.roomManager.createRoom(user1, user2);
+
+        this.clearQueue();
     }
 
     initHandlers(socket: Socket) {
@@ -59,5 +61,9 @@ export class UserManager {
         socket.on('answer', ({ sdp, roomId }: { sdp: string, roomId: string }) => {
             this.roomManager.onAnswer(roomId, sdp, socket.id);
         })
+
+        socket.on("add-ice-candidate", ({ candidate, roomId, type }) => {
+            this.roomManager.onIceCandidates(roomId, socket.id, candidate, type);
+        });
     }
 }
