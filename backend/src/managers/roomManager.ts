@@ -32,6 +32,34 @@ export class RoomManager {
         })
     }
 
+    onOffer(roomId: string, sdp: string, senderSocketId: string) {
+        const room = this.rooms.get(roomId);
+        if (!room) {
+            return;
+        }
+
+        const recievingUser = room.user1.socket.id === senderSocketId ? room.user2 : room.user1
+        recievingUser.socket.emit('offer', {
+            sdp,
+            roomId
+        })
+    }
+
+    onAnswer(roomId: string, sdp: string, senderSocketId: string) {
+        const room = this.rooms.get(roomId);
+        if (!room) {
+            return;
+        }
+
+        const recievingUser = room.user1.socket.id === senderSocketId ? room.user2 : room.user1;
+        recievingUser.socket.emit('answer', {
+            sdp,
+            roomId
+        })
+    }
+
+
+
     generate() {
         return GLOBAL_ROOM_ID++;
     }
