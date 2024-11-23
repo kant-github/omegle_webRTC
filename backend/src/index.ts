@@ -8,7 +8,7 @@ const app = express();
 const server = http.createServer(app);
 const userManager = new UserManager();
 
-const io = new Server({
+const io = new Server(server, {
     cors: {
         origin: "*"
     }
@@ -17,7 +17,7 @@ const io = new Server({
 io.on('connection', (socket: Socket) => {
     console.log("a user is connected");
     userManager.addUser("randomName", socket);
-    
+
     socket.on('disconnect', () => {
         console.log("a user is disconnected")
         userManager.removeUser(socket.id)

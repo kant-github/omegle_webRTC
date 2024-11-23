@@ -70,5 +70,4 @@ export class RoomManager {
     generate() {
         return GLOBAL_ROOM_ID++;
     }
-
 }
