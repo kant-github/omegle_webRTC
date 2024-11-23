@@ -20,8 +20,10 @@ export class UserManager {
     addUser(name: string, socket: Socket) {
         this.users.push({ name, socket });
         this.queue.push(socket.id);
+        console.log("inside add user");
         socket.emit("lobby");
         this.clearQueue();
+        this.initHandlers(socket);
     }
 
     removeUser(socketId: string) {
@@ -40,8 +42,13 @@ export class UserManager {
         const socketID1 = this.queue.pop();
         const socketID2 = this.queue.pop();
 
+        console.log("socket ids are " + socketID1 + " " + socketID2);
+
         const user1 = this.users.find(x => x.socket.id === socketID1);
         const user2 = this.users.find(x => x.socket.id === socketID2);
+
+        console.log("users are " + user1?.name + " " + user2?.name);
+
 
         if (!user1 || !user2) {
             return;
@@ -55,6 +62,7 @@ export class UserManager {
 
     initHandlers(socket: Socket) {
         socket.on('offer', ({ sdp, roomId }: { sdp: string, roomId: string }) => {
+            console.log("recieved the sdp");
             this.roomManager.onOffer(roomId, sdp, socket.id)
         })
 

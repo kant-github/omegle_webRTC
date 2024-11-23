@@ -30,13 +30,12 @@ export default function Room() {
             })
         })
 
+        socket.on('lobby', () => {
+            setLobby(true);
+        })
+
         socket.on('answer', ({ roomId, answer }) => {
-            alert('send offer please');
-            setLobby(false);
-            socket.emit('offer', {
-                roomId,
-                sdp: ""
-            })
+            alert('connection done :)');
         })
 
 

@@ -17,16 +17,17 @@ export class RoomManager {
     createRoom(user1: Users, user2: Users) {
 
         const roomId = this.generate().toString();
+        console.log("created room's id is : ", roomId);
 
         this.rooms.set(roomId, {
             user1,
             user2
         })
-
+        console.log("asking for offer from user 1");
         user1.socket.emit("send-offer", {
             roomId
         })
-
+        console.log("asking for offer from user 2");
         user2.socket.emit("send-offer", {
             roomId
         })
