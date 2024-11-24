@@ -9,27 +9,68 @@ interface props {
     localVideoTrack: MediaStreamTrack | null;
 }
 
-export default function Room({ name }: props) {
-    // const [searchParams, setSearchParams] = useSearchParams();
-    // const name = searchParams.get('name');
+export default function Room({ name, localAudioTrack, localVideoTrack }: props) {
     const [socket, setSocket] = useState<Socket | null>(null);
     const [lobby, setLobby] = useState(true);
+    const [sendingPc, setSendingPc] = useState<RTCPeerConnection | null>(null);
+    const [recievingPc, setRecievingPc] = useState<RTCPeerConnection | null>(null);
+
+
     useEffect(() => {
         const socket = io(URL);
 
         socket.on('send-offer', ({ roomId }) => {
             console.log("sending offer from the frontend");
             setLobby(false);
-            socket.emit('offer', {
-                roomId,
-                sdp: ""
-            })
+
+            const pc = new RTCPeerConnection();
+            setSendingPc(pc);
+
+            if (localVideoTrack) {
+                console.log("added senders video track to pc object");
+                pc.addTrack(localVideoTrack)
+            }
+
+            if (localAudioTrack) {
+                console.log("added senders audio track to pc object");
+                pc.addTrack(localAudioTrack);
+            }
+
+            pc.onicecandidate = (e) => {
+                console.log("recieving ice candidate locally");
+                if (e.candidate) {
+                    socket.emit("add-ice-candidate", {
+                        candidate: e.candidate,
+                        type: 'sender',
+                        roomId
+                    })
+                }
+            }
+
+            pc.onnegotiationneeded = () => {
+                const sdp = pc.createOffer();
+                // @ts-ignore
+                pc.setLocalDescription(sdp);
+                socket.emit('offer', {
+                    roomId,
+                    sdp
+                })
+            }
+
+
         })
 
-        socket.on('offer', async ({ roomId, offer }) => {
+        socket.on('offer', async ({ roomId, sdp: remoteSdp }) => {
             console.log("recieved the offer and sending the answer now ");
-            await new Promise(t => setTimeout(t, 7000));
             setLobby(false);
+
+            const pc = new RTCPeerConnection();
+            pc.setRemoteDescription(remoteSdp);
+            
+            setRecievingPc(pc);
+            const sdp = await pc.createAnswer();
+            pc.setLocalDescription(sdp);
+            
             socket.emit("answer", {
                 roomId,
                 sdp: ""
