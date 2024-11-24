@@ -34,8 +34,9 @@ export class UserManager {
     }
 
     clearQueue() {
+        console.log("inside claer queuues");
+        console.log(this.queue.length);
         if (this.queue.length < 2) {
-            console.log("Not enough users to create room");
             return;
         }
 
@@ -62,7 +63,7 @@ export class UserManager {
 
     initHandlers(socket: Socket) {
         socket.on('offer', ({ sdp, roomId }: { sdp: string, roomId: string }) => {
-            console.log("recieved the sdp");
+            console.log("recieved the offer");
             this.roomManager.onOffer(roomId, sdp, socket.id)
         })
 

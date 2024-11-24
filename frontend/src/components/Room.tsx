@@ -1,28 +1,34 @@
 import { useEffect, useState } from "react"
-import { useSearchParams } from "react-router-dom";
 import { io, Socket } from "socket.io-client"
 
 const URL: string = "http://localhost:3000"
-export default function Room() {
-    const [searchParams, setSearchParams] = useSearchParams();
-    const name = searchParams.get('name');
+
+interface props {
+    name: string | null;
+    localAudioTrack: MediaStreamTrack | null;
+    localVideoTrack: MediaStreamTrack | null;
+}
+
+export default function Room({ name }: props) {
+    // const [searchParams, setSearchParams] = useSearchParams();
+    // const name = searchParams.get('name');
     const [socket, setSocket] = useState<Socket | null>(null);
     const [lobby, setLobby] = useState(true);
     useEffect(() => {
-        console.log("inisde use Effect");
         const socket = io(URL);
 
-        socket.on("send-offer", ({ roomId }) => {
-            alert("send offer please");
+        socket.on('send-offer', ({ roomId }) => {
+            console.log("sending offer from the frontend");
             setLobby(false);
-            socket.emit("offer", {
+            socket.emit('offer', {
                 roomId,
                 sdp: ""
             })
         })
 
-        socket.on('offer', ({ roomId, offer }) => {
-            alert('send answer please');
+        socket.on('offer', async ({ roomId, offer }) => {
+            console.log("recieved the offer and sending the answer now ");
+            await new Promise(t => setTimeout(t, 7000));
             setLobby(false);
             socket.emit("answer", {
                 roomId,
@@ -30,17 +36,21 @@ export default function Room() {
             })
         })
 
+
+        socket.on('answer', ({ roomId, answer }) => {
+            setLobby(false);
+            console.log('connection done :)');
+        })
+
         socket.on('lobby', () => {
             setLobby(true);
         })
 
-        socket.on('answer', ({ roomId, answer }) => {
-            alert('connection done :)');
-        })
-
-
     }, [])
 
+    if (lobby) {
+        <div>Waiting to connect you to someone</div>
+    }
     return (
         <div>
             Hi {name}
