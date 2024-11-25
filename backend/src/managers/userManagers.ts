@@ -68,6 +68,7 @@ export class UserManager {
         })
 
         socket.on('answer', ({ sdp, roomId }: { sdp: string, roomId: string }) => {
+            console.log("recieved the answer");
             this.roomManager.onAnswer(roomId, sdp, socket.id);
         })
 

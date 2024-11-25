@@ -40,7 +40,7 @@ export class RoomManager {
         }
 
         const recievingUser = room.user1.socket.id === senderSocketId ? room.user2 : room.user1
-        recievingUser.socket.emit('offer', {
+        recievingUser.socket.emit("offer", {
             sdp,
             roomId
         })
