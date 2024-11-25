@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { io, Socket } from "socket.io-client"
+import { io } from "socket.io-client"
 
 const URL: string = "http://localhost:3000"
 
@@ -10,17 +10,17 @@ interface props {
 }
 
 export default function Room({ name, localAudioTrack, localVideoTrack }: props) {
-    const [socket, setSocket] = useState<Socket | null>(null);
     const [lobby, setLobby] = useState(true);
     const [sendingPc, setSendingPc] = useState<RTCPeerConnection | null>(null);
     const [receivingPc, setReceivingPc] = useState<RTCPeerConnection | null>(null);
-    const [remoteMediaStream, setRemoteMediaStream] = useState<MediaStream | null>(null);
-    const [remoteAudioTrack, setRemoteAudioTrack] = useState<MediaStreamTrack | null>(null);
-    const [remoteVideoTrack, setRemoteVideoTrack] = useState<MediaStreamTrack | null>(null);
+    // const [remoteMediaStream, setRemoteMediaStream] = useState<MediaStream | null>(null);
+    // const [remoteAudioTrack, setRemoteAudioTrack] = useState<MediaStreamTrack | null>(null);
+    // const [remoteVideoTrack, setRemoteVideoTrack] = useState<MediaStreamTrack | null>(null);
     const localVideoRef = useRef<HTMLVideoElement | null>(null);
     const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
 
-
+    console.log(sendingPc);
+    console.log(receivingPc);
 
     useEffect(() => {
         const socket = io(URL);
@@ -55,7 +55,6 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
             pc.onnegotiationneeded = async () => {
                 console.log("negotiated and sent the offer");
                 const sdp = await pc.createOffer();
-                // @ts-ignore
                 pc.setLocalDescription(sdp);
                 socket.emit('offer', {
                     roomId,
@@ -83,9 +82,9 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
             if (remoteVideoRef.current) {
                 remoteVideoRef.current.srcObject = stream;
             }
-            setRemoteMediaStream(stream);
+            // setRemoteMediaStream(stream);
             window.pcr = pc;
-            pc.ontrack = (e) => {
+            pc.ontrack = () => {
                 alert('incoming video on track')
             }
 
@@ -112,25 +111,28 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
                 const track1 = pc.getTransceivers()[0].receiver.track;
                 const track2 = pc.getTransceivers()[1].receiver.track;
 
-                if (track1.kind === 'audio') {
-                    setRemoteAudioTrack(track1);
-                    setRemoteVideoTrack(track2);
-                } else {
-                    setRemoteAudioTrack(track2);
-                    setRemoteVideoTrack(track1);
+                // if (track1.kind === 'audio') {
+                //     setRemoteAudioTrack(track1);
+                //     setRemoteVideoTrack(track2);
+                // } else {
+                //     setRemoteAudioTrack(track2);
+                //     setRemoteVideoTrack(track1);
+                // }
+
+
+                const mediaStream = remoteVideoRef.current?.srcObject as MediaStream | null;
+                if (mediaStream) {
+                    mediaStream.addTrack(track1);
+                    mediaStream.addTrack(track2);
                 }
 
-                // @ts-ignore
-                remoteVideoRef.current.srcObject.addTrack(track1);
-                // @ts-ignore
-                remoteVideoRef.current.srcObject.addTrack(track2);
-                // @ts-ignore
-                remoteVideoRef.current.play();
+                
+                remoteVideoRef.current?.play();
             }, 5000)
         })
 
 
-        socket.on('answer', ({ roomId, sdp: remoteSdp }) => {
+        socket.on('answer', ({ sdp: remoteSdp }) => {
             console.log('recieved the answer');
             console.log(remoteSdp);
             setLobby(false);
@@ -171,9 +173,11 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
             }
         })
 
-        setSocket(socket);
+        return () => {
+            socket.disconnect();
+        }
 
-    }, [name])
+    }, [localAudioTrack, localVideoTrack, name])
 
     useEffect(() => {
         if (localVideoRef.current) {
@@ -182,7 +186,7 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
                 localVideoRef.current.play();
             }
         }
-    }, [localVideoRef])
+    }, [localVideoTrack])
 
     return (
         <div>

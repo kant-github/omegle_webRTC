@@ -37,7 +37,8 @@ export default function HomePage() {
         return (
             <div>
                 <video autoPlay ref={videoRef}></video>
-                <input type="text" onChange={(e) => {
+                <label htmlFor="name">Enter your name</label>
+                <input id="name" type="text" onChange={(e) => {
                     setName(e.target.value)
                 }} />
                 <button onClick={() => setJoined(true)}>Join</button>
