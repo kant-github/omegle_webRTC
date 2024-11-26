@@ -7,8 +7,9 @@ export interface Users {
 }
 
 export class UserManager {
-    private users: Users[];
+
     private queue: string[];
+    private users: Users[];
     private roomManager: RoomManager;
 
     constructor() {
@@ -36,11 +37,9 @@ export class UserManager {
         const room = data.room;
         const roomId = data.roomId;
 
-
         if (room) {
             const remainingUser = room.user1.socket.id === socketId ? room.user2 : room.user1;
             this.queue.push(remainingUser.socket.id);
-
             this.roomManager.destroyRoom(roomId);
             remainingUser.socket.emit("lobby");
         }
@@ -54,6 +53,7 @@ export class UserManager {
     }
 
     clearQueue() {
+
         if (this.queue.length < 2) {
             return;
         }
@@ -68,18 +68,17 @@ export class UserManager {
             return;
         }
 
-        const room = this.roomManager.createRoom(user1, user2);
-
+        this.roomManager.createRoom(user1, user2);
         this.clearQueue();
     }
 
     initHandlers(socket: Socket) {
+
         socket.on('offer', ({ sdp, roomId }: { sdp: string, roomId: string }) => {
             this.roomManager.onOffer(roomId, sdp, socket.id)
         })
 
         socket.on('answer', ({ sdp, roomId }: { sdp: string, roomId: string }) => {
-
             this.roomManager.onAnswer(roomId, sdp, socket.id);
         })
 
@@ -87,4 +86,5 @@ export class UserManager {
             this.roomManager.onIceCandidates(roomId, socket.id, candidate, type);
         });
     }
+    
 }
