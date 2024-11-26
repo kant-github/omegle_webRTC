@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { io } from "socket.io-client"
 
-const URL: string = "http://localhost:3000"
+const BACKEND_URL: string = "http://localhost:8080"
 
 interface props {
     name: string | null;
@@ -24,7 +24,7 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
     console.log(receivingPc);
 
     useEffect(() => {
-        const socket = io(URL);
+        const socket = io(BACKEND_URL);
 
         socket.on('connect', () => {
             if (name) {
@@ -38,7 +38,11 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
             setPartnersName(partnersName);
             setLobby(false);
 
-            const pc = new RTCPeerConnection();
+            const pc = new RTCPeerConnection({
+                iceServers: [
+                    { urls: "stun:stun.l.google.com:19302" }
+                ]
+            });
             setSendingPc(pc);
 
             if (localVideoTrack) {
@@ -70,8 +74,6 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
                     sdp
                 })
             }
-
-
         })
 
         socket.on("offer", async ({ roomId, sdp: remoteSdp }) => {
@@ -153,6 +155,7 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
         })
 
         socket.on('lobby', () => {
+            console.log("in lobby now");
             setLobby(true);
         })
 
@@ -183,6 +186,7 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
         })
 
         return () => {
+            setLobby(true);
             socket.disconnect();
         }
 
@@ -200,7 +204,7 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
     return (
         <div className="h-screen w-screen flex items-center justify-center bg-black relative">
 
-            // Receiver's video
+            {/* Receiver's video */}
             <div className="w-3/4 max-w-4xl aspect-video bg-gray-900 rounded-lg overflow-hidden shadow-lg relative">
                 <video
                     autoPlay

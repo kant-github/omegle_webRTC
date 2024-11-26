@@ -3,7 +3,7 @@ import express from "express";
 import { Server, Socket } from "socket.io";
 import { UserManager } from "./managers/userManagers";
 
-const PORT = 3000;
+const PORT = 8080;
 const app = express();
 const server = http.createServer(app);
 const userManager = new UserManager();

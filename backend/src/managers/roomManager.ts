@@ -14,6 +14,19 @@ export class RoomManager {
         this.rooms = new Map<string, Room>();
     }
 
+    getRoomBySocketId(socketId: string) {
+        for (const [roomId, room] of this.rooms) {
+
+            if (room.user1.socket.id === socketId || room.user2.socket.id === socketId) {
+                return {
+                    roomId,
+                    room
+                };
+            }
+        }
+        return null;
+    }
+
     createRoom(user1: Users, user2: Users) {
 
         const roomId = this.generate().toString();
@@ -22,6 +35,8 @@ export class RoomManager {
             user1,
             user2
         })
+
+        console.log("created room for the users" + user1.name + " " + user2.name);
 
         user1.socket.emit("send-offer", {
             roomId,
@@ -32,6 +47,10 @@ export class RoomManager {
             roomId,
             partnersName: user1.name
         })
+    }
+
+    destroyRoom(roomId: string) {
+        this.rooms.delete(roomId);
     }
 
     onOffer(roomId: string, sdp: string, senderSocketId: string) {
