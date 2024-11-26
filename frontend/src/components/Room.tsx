@@ -46,12 +46,10 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
             setSendingPc(pc);
 
             if (localVideoTrack) {
-                console.log("added senders video track to pc object");
                 pc.addTrack(localVideoTrack)
             }
 
             if (localAudioTrack) {
-                console.log("added senders audio track to pc object");
                 pc.addTrack(localAudioTrack);
             }
 
@@ -66,7 +64,6 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
             }
 
             pc.onnegotiationneeded = async () => {
-                console.log("negotiated and sent the offer");
                 const sdp = await pc.createOffer();
                 pc.setLocalDescription(sdp);
                 socket.emit('offer', {
@@ -77,8 +74,7 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
         })
 
         socket.on("offer", async ({ roomId, sdp: remoteSdp }) => {
-            console.log("recieved the offer and sending the answer now ");
-            console.log(remoteSdp);
+
             setLobby(false);
 
             const pc = new RTCPeerConnection();
@@ -88,18 +84,16 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
             pc.setLocalDescription(sdp);
             setReceivingPc(pc);
 
-            //setting up the upcoming stream
             const stream = new MediaStream()
             if (remoteVideoRef.current) {
                 remoteVideoRef.current.srcObject = stream;
             }
-            // setRemoteMediaStream(stream);
+
             window.pcr = pc;
             pc.ontrack = () => {
                 alert('incoming video on track')
             }
 
-            //on-ice-candidate on the reciever side :)
             pc.onicecandidate = (e) => {
                 if (!e.candidate) {
                     return;
@@ -144,24 +138,19 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
 
 
         socket.on('answer', ({ sdp: remoteSdp }) => {
-            console.log('recieved the answer');
-            console.log(remoteSdp);
             setLobby(false);
             setSendingPc(pc => {
                 pc?.setRemoteDescription(remoteSdp)
                 return pc;
             })
-            console.log('connection done :)');
         })
 
         socket.on('lobby', () => {
-            console.log("in lobby now");
             setLobby(true);
         })
 
         socket.on("add-ice-candidate", ({ candidate, type }) => {
-            console.log("add ice candidate from remote");
-            console.log({ candidate, type })
+            
             if (type == "sender") {
                 setReceivingPc(pc => {
                     if (!pc) {
