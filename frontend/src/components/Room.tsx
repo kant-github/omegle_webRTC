@@ -13,6 +13,7 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
     const [lobby, setLobby] = useState(true);
     const [sendingPc, setSendingPc] = useState<RTCPeerConnection | null>(null);
     const [receivingPc, setReceivingPc] = useState<RTCPeerConnection | null>(null);
+    const [partnersName, setPartnersName] = useState<string | null>(null);
     // const [remoteMediaStream, setRemoteMediaStream] = useState<MediaStream | null>(null);
     // const [remoteAudioTrack, setRemoteAudioTrack] = useState<MediaStreamTrack | null>(null);
     // const [remoteVideoTrack, setRemoteVideoTrack] = useState<MediaStreamTrack | null>(null);
@@ -25,8 +26,16 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
     useEffect(() => {
         const socket = io(URL);
 
-        socket.on('send-offer', ({ roomId }) => {
-            console.log("sending offer from the frontend");
+        socket.on('connect', () => {
+            if (name) {
+                socket.emit("user-joined", {
+                    name
+                })
+            }
+        })
+
+        socket.on('send-offer', ({ roomId, partnersName }) => {
+            setPartnersName(partnersName);
             setLobby(false);
 
             const pc = new RTCPeerConnection();
@@ -126,7 +135,7 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
                     mediaStream.addTrack(track2);
                 }
 
-                
+
                 remoteVideoRef.current?.play();
             }, 5000)
         })
@@ -189,11 +198,38 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
     }, [localVideoTrack])
 
     return (
-        <div>
-            <video autoPlay width={400} height={400} ref={localVideoRef}></video>
-            {lobby ? "Waiting to connect you to someone" : null}
-            <video autoPlay width={400} height={400} ref={remoteVideoRef}></video>
-        </div>
+        <div className="h-screen w-screen flex items-center justify-center bg-black relative">
 
-    )
+            // Receiver's video
+            <div className="w-3/4 max-w-4xl aspect-video bg-gray-900 rounded-lg overflow-hidden shadow-lg relative">
+                <video
+                    autoPlay
+                    ref={remoteVideoRef}
+                    className="w-full h-full object-cover"
+                ></video>
+                <span className="absolute bottom-4 right-4 bg-blue-500 text-white text-sm px-3 py-1 rounded-md shadow-md">
+                    {partnersName}
+                </span>
+            </div>
+
+            {/* Sender's Video */}
+            <div className="absolute bottom-50 left-12 w-40 h-40 border-2 border-white rounded-md overflow-hidden shadow-md bg-gray-800">
+                <video
+                    autoPlay
+                    ref={localVideoRef}
+                    className="h-full w-full object-cover"
+                ></video>
+                <span className="absolute bottom-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-md">
+                    You
+                </span>
+            </div>
+
+            {lobby && (
+                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-gray-900 bg-opacity-70 text-white text-sm px-4 py-2 rounded-md shadow-md">
+                    Waiting to connect you to someone...
+                </div>
+            )}
+        </div>
+    );
+
 }

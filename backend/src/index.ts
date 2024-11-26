@@ -16,7 +16,10 @@ const io = new Server(server, {
 
 io.on('connection', (socket: Socket) => {
     console.log("a user is connected");
-    userManager.addUser("randomName", socket);
+
+    socket.on('user-joined', ({ name }) => {
+        userManager.addUser(name, socket);
+    })
 
     socket.on('disconnect', () => {
         console.log("a user is disconnected")
