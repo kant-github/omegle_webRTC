@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { io } from "socket.io-client"
 
-const BACKEND_URL: string = "http://backend-crooked.kantbuilds.com/"
+const BACKEND_URL: string = "https://backend-crooked.kantbuilds.com/"
 
 interface props {
     name: string | null;
