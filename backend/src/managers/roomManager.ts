@@ -36,6 +36,8 @@ export class RoomManager {
             user2
         })
 
+        console.log("room created for the user " + user1.name + " " + user2.name);
+
         user1.socket.emit("send-offer", {
             roomId,
             partnersName: user2.name
@@ -49,7 +51,7 @@ export class RoomManager {
     }
 
     destroyRoom(roomId: string) {
-        this.rooms.delete(roomId);        
+        this.rooms.delete(roomId);
     }
 
     onOffer(roomId: string, sdp: string, senderSocketId: string) {
@@ -88,7 +90,7 @@ export class RoomManager {
         }
         const receivingUser = room.user1.socket.id === senderSocketid ? room.user2 : room.user1;
         receivingUser.socket.emit("add-ice-candidate", ({ candidate, type }));
-        
+
     }
 
     generate() {

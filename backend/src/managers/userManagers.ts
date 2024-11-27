@@ -48,6 +48,10 @@ export class UserManager {
 
         this.users = this.users.filter(x => x.socket.id !== socketId);
         this.queue = this.queue.filter(x => x !== socketId);
+        console.log("printing the queue ");
+        for (let i = 0; i < this.queue.length; i++) {
+            console.log(this.queue[i]);
+        }
 
         this.clearQueue();
     }
@@ -86,5 +90,5 @@ export class UserManager {
             this.roomManager.onIceCandidates(roomId, socket.id, candidate, type);
         });
     }
-    
+
 }

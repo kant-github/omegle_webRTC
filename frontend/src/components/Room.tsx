@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { io } from "socket.io-client"
 
-const BACKEND_URL: string = "http://localhost:8080"
+const BACKEND_URL: string = "http://backend-crooked.kantbuilds.com/"
 
 interface props {
     name: string | null;
@@ -150,7 +150,7 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
         })
 
         socket.on("add-ice-candidate", ({ candidate, type }) => {
-            
+
             if (type == "sender") {
                 setReceivingPc(pc => {
                     if (!pc) {
@@ -195,11 +195,15 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
 
             {/* Receiver's video */}
             <div className="w-3/4 max-w-4xl aspect-video bg-gray-900 rounded-lg overflow-hidden shadow-lg relative">
-                <video
-                    autoPlay
-                    ref={remoteVideoRef}
-                    className="w-full h-full object-cover"
-                ></video>
+                {
+                    lobby ? (<div>loading</div>) : (
+                        <video
+                            autoPlay
+                            ref={remoteVideoRef}
+                            className="w-full h-full object-cover"
+                        ></video>
+                    )
+                }
                 <span className="absolute bottom-4 right-4 bg-blue-500 text-white text-sm px-3 py-1 rounded-md shadow-md">
                     {partnersName}
                 </span>
