@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { io } from "socket.io-client"
+import Loading from "./Loading";
 
 const BACKEND_URL: string = "http://localhost:8080"
 
@@ -192,7 +193,7 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
             {/* Receiver's video */}
             <div className="w-3/4 max-w-4xl aspect-video bg-gray-900 rounded-lg overflow-hidden shadow-lg relative">
                 {
-                    lobby ? (<div>loading</div>) : (
+                    lobby ? (<Loading />) : (
                         <video
                             autoPlay
                             ref={remoteVideoRef}
