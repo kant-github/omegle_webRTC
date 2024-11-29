@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { io } from "socket.io-client"
 import Loading from "./Loading";
 
-const BACKEND_URL: string = "http://localhost:8080"
+const BACKEND_URL: string = "https://backend-crooked.kantbuilds.com"
 
 interface props {
     name: string | null;
