@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { io } from "socket.io-client"
 
-const BACKEND_URL: string = "https://backend-crooked.kantbuilds.com/"
+const BACKEND_URL: string = "http://localhost:8080"
 
 interface props {
     name: string | null;
@@ -38,11 +38,7 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
             setPartnersName(partnersName);
             setLobby(false);
 
-            const pc = new RTCPeerConnection({
-                iceServers: [
-                    { urls: "stun:stun.l.google.com:19302" }
-                ]
-            });
+            const pc = new RTCPeerConnection();
             setSendingPc(pc);
 
             if (localVideoTrack) {

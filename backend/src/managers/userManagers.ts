@@ -31,6 +31,14 @@ export class UserManager {
 
     removeUser(socketId: string) {
 
+        this.users = this.users.filter(x => x.socket.id !== socketId);
+        this.queue = this.queue.filter(x => x !== socketId);
+
+        console.log("printing the queue ");
+        for (let i = 0; i < this.queue.length; i++) {
+            console.log(this.queue[i]);
+        }
+
         const data = this.roomManager.getRoomBySocketId(socketId);
         if (!data) return;
 
@@ -39,20 +47,18 @@ export class UserManager {
 
         if (room) {
             const remainingUser = room.user1.socket.id === socketId ? room.user2 : room.user1;
-            this.queue.push(remainingUser.socket.id);
+            console.log("remaining user is : ");
+            console.log(remainingUser);
+            console.log("remaining user is : ", remainingUser.socket.connected);
+            if(remainingUser.socket.connected) {
+                this.queue.push(remainingUser.socket.id);
+            }
+
             this.roomManager.destroyRoom(roomId);
             remainingUser.socket.emit("lobby");
         }
 
         const user = this.users.find(x => x.socket.id === socketId);
-
-        this.users = this.users.filter(x => x.socket.id !== socketId);
-        this.queue = this.queue.filter(x => x !== socketId);
-        console.log("printing the queue ");
-        for (let i = 0; i < this.queue.length; i++) {
-            console.log(this.queue[i]);
-        }
-
         this.clearQueue();
     }
 
