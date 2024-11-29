@@ -39,7 +39,21 @@ export default function Room({ name, localAudioTrack, localVideoTrack }: props) 
             setPartnersName(partnersName);
             setLobby(false);
 
-            const pc = new RTCPeerConnection();
+            const pc = new RTCPeerConnection({
+                iceServers: [
+                    { urls: "stun:global.stun.twilio.com:3478" },
+                    {
+                        urls: "turn:global.turn.twilio.com:3478?transport=udp",
+                        username: "56b38e26bd05e143c752bfd344f9562e9fd80d4d4da91f04ee10249da5413835",
+                        credential: "xlNfdeWPg4S54dA1NFj/OcFf6DjSHSxKgoBP2fINeiY="
+                    },
+                    {
+                        urls: "turn:global.turn.twilio.com:3478?transport=tcp",
+                        username: "56b38e26bd05e143c752bfd344f9562e9fd80d4d4da91f04ee10249da5413835",
+                        credential: "xlNfdeWPg4S54dA1NFj/OcFf6DjSHSxKgoBP2fINeiY="
+                    }
+                ]
+            });
             setSendingPc(pc);
 
             if (localVideoTrack) {
